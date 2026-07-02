@@ -1,0 +1,16 @@
+{
+    "name": "slgti/impact-report",
+    "description": "SLGTI 10-Year Impact Report - Plain PHP",
+    "require": {
+        "php": ">=8.0",
+        "dompdf/dompdf": "^2.0",
+        "phpoffice/phpspreadsheet": "^1.29"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "platform": {
+            "php": "8.0.26"
+        },
+        "platform-check": false
+    }
+}

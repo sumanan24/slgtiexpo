@@ -1,0 +1,27 @@
+:root {
+    --slgti-primary: #005BAC;
+    --slgti-secondary: #FFC107;
+    --slgti-primary-dark: #004a8f;
+}
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7fb; }
+.bg-slgti-primary { background-color: var(--slgti-primary) !important; }
+.text-slgti-primary { color: var(--slgti-primary) !important; }
+.btn-slgti-primary { background-color: var(--slgti-primary); border-color: var(--slgti-primary); color: #fff; }
+.btn-slgti-primary:hover { background-color: var(--slgti-primary-dark); border-color: var(--slgti-primary-dark); color: #fff; }
+.btn-slgti-secondary { background-color: var(--slgti-secondary); border-color: var(--slgti-secondary); color: #212529; }
+.navbar-brand span { color: var(--slgti-secondary); }
+.hero-section { background: linear-gradient(135deg, var(--slgti-primary) 0%, #003d73 100%); color: #fff; padding: 4rem 0; }
+.card-stat { border: none; border-left: 4px solid var(--slgti-primary); box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,0.08); }
+.card-stat .stat-icon { width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(0,91,172,0.1);color:var(--slgti-primary); }
+.form-section { background:#fff;border-radius:0.5rem;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 0.125rem 0.25rem rgba(0,0,0,0.05);border-top:3px solid var(--slgti-secondary); }
+.form-section h5 { color:var(--slgti-primary);margin-bottom:1rem;font-weight:600; }
+.admin-sidebar { min-height:100vh;background:var(--slgti-primary); }
+.admin-sidebar .nav-link { color:rgba(255,255,255,0.85);padding:0.75rem 1.25rem;border-radius:0.375rem;margin:0.15rem 0.5rem; }
+.admin-sidebar .nav-link:hover,.admin-sidebar .nav-link.active { background:rgba(255,255,255,0.15);color:#fff; }
+.table-slgti thead { background-color:var(--slgti-primary);color:#fff; }
+.badge-pending { background-color:var(--slgti-secondary);color:#212529; }
+.badge-completed { background-color:#198754; }
+.report-card { border:none;box-shadow:0 0.125rem 0.5rem rgba(0,0,0,0.08); }
+footer { background:var(--slgti-primary);color:#fff;padding:1.5rem 0;margin-top:3rem; }
+.chart-container { position:relative;height:300px; }
+@media print { .no-print { display:none !important; } }
