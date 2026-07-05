@@ -1,7 +1,7 @@
 <?php
 /**
  * SLGTI Database Installer
- * Run once: http://localhost/slgti/install.php
+ * Run once: http://localhost/slgtiexpo/install.php
  * Delete this file after successful installation.
  */
 require_once __DIR__ . '/includes/init.php';
@@ -11,16 +11,9 @@ $success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        $sql = file_get_contents(ROOT_PATH . '/database/slgti_impact.sql');
-        $pdo = new PDO(
-            sprintf('mysql:host=%s;port=%s;charset=utf8mb4', $config['db_host'], $config['db_port']),
-            $config['db_user'],
-            $config['db_pass'],
-            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-        );
-        $pdo->exec($sql);
+        install_database();
         $success = true;
-        $messages[] = 'Database installed successfully!';
+        $messages[] = 'Database installed successfully using config/config.php connection settings.';
     } catch (Throwable $e) {
         $messages[] = 'Error: ' . $e->getMessage();
     }
@@ -29,11 +22,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo = db();
         $depts = (int)$pdo->query('SELECT COUNT(*) FROM departments')->fetchColumn();
         $admins = (int)$pdo->query('SELECT COUNT(*) FROM admins')->fetchColumn();
-        $messages[] = "Database connected. Departments: $depts, Admins: $admins";
+        $hodUsers = (int)$pdo->query('SELECT COUNT(*) FROM hod_users')->fetchColumn();
+        $messages[] = "Database connected. Departments: $depts, Admins: $admins, Staff accounts: $hodUsers";
         $success = $depts > 0 && $admins > 0;
     } catch (Throwable $e) {
         $messages[] = 'Connection failed: ' . $e->getMessage();
-        $messages[] = 'Click Install to create database and tables.';
+        $messages[] = 'Check config/config.php, then click Install to create the database and tables.';
     }
 }
 ?>
@@ -54,12 +48,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php foreach ($messages as $msg): ?>
                         <div class="alert alert-<?= $success ? 'success' : 'warning' ?>"><?= htmlspecialchars($msg) ?></div>
                     <?php endforeach; ?>
+                    <div class="bg-light border rounded p-3 mb-3 small">
+                        <strong>Database config</strong><br>
+                        Host: <?= htmlspecialchars($config['db_host']) ?><br>
+                        Port: <?= htmlspecialchars($config['db_port']) ?><br>
+                        Database: <?= htmlspecialchars($config['db_name']) ?><br>
+                        User: <?= htmlspecialchars($config['db_user']) ?>
+                    </div>
                     <?php if ($success): ?>
                         <p><strong>Admin Login:</strong> admin@slgti.lk / admin123</p>
                         <a href="<?= url('index.php') ?>" class="btn btn-primary">Go to Home</a>
                         <a href="<?= url('admin/login.php') ?>" class="btn btn-outline-primary">Admin Login</a>
                     <?php else: ?>
-                        <p class="text-muted">Config: <?= htmlspecialchars($config['db_host']) ?>:<?= htmlspecialchars($config['db_port']) ?> / <?= htmlspecialchars($config['db_name']) ?></p>
                         <form method="POST">
                             <button type="submit" class="btn btn-primary w-100">Install Database</button>
                         </form>
