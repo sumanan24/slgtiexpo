@@ -17,4 +17,5 @@ require_once ROOT_PATH . '/includes/database.php';
 require_once ROOT_PATH . '/includes/helpers.php';
 require_once ROOT_PATH . '/includes/auth.php';
 require_once ROOT_PATH . '/includes/Department.php';
+require_once ROOT_PATH . '/includes/HodUser.php';
 require_once ROOT_PATH . '/includes/Submission.php';

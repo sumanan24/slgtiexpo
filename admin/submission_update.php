@@ -8,7 +8,7 @@ $submission = Submission::find($id);
 if (!$submission) { flash('error', 'Submission not found.'); redirect('admin/submissions.php'); }
 $data = collect_submission_data();
 $errors = validate_submission($data, true);
-if ($errors) { $_SESSION['form_errors'] = $errors; redirect('admin/submission_edit.php?id=' . $id); }
+if ($errors) { $_SESSION['form_errors'] = $errors; store_submission_form_input($data, $id); redirect('admin/submission_edit.php?id=' . $id); }
 try {
     $doc = handle_upload($_FILES['supporting_documents'] ?? null, $submission['supporting_documents'] ?? null);
     Submission::update($id, $data, $doc);
@@ -16,5 +16,6 @@ try {
     redirect('admin/submission_view.php?id=' . $id);
 } catch (Throwable $e) {
     $_SESSION['form_errors'] = [$e->getMessage()];
+    store_submission_form_input($data, $id);
     redirect('admin/submission_edit.php?id=' . $id);
 }

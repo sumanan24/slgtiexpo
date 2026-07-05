@@ -25,7 +25,6 @@ require ROOT_PATH . '/includes/partials/header_admin.php';
 <?php foreach ($departments as $d): ?>
 <div class="col-md-6 col-lg-4"><div class="card border-0 shadow-sm"><div class="card-body">
     <h6><?= e($d['department_name']) ?></h6>
-    <p class="small text-muted">Staff Name: <?= e($d['staff_name']) ?></p>
     <a href="<?= url('admin/report_department.php?id=' . $d['id']) ?>" class="btn btn-sm btn-slgti-primary">View</a>
     <a href="<?= url('admin/export_pdf.php?type=department&department_id=' . $d['id']) ?>" class="btn btn-sm btn-outline-danger">PDF</a>
     <a href="<?= url('admin/export_excel.php?type=department&department_id=' . $d['id']) ?>" class="btn btn-sm btn-outline-success">Excel</a>

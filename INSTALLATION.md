@@ -66,7 +66,7 @@ slgti/
 ├── index.php              # Home page
 ├── config/config.php      # Database settings
 ├── includes/              # Core PHP classes & helpers
-├── submit/                # HOD submission forms
+├── submit/                # Staff submission forms
 ├── admin/                 # Admin panel
 ├── assets/css/            # Stylesheets
 ├── uploads/               # Uploaded documents

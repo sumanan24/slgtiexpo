@@ -32,12 +32,33 @@ CREATE TABLE IF NOT EXISTS `admins` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
+-- Table: hod_users (multiple staff accounts per department)
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `hod_users` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `department_id` BIGINT UNSIGNED NOT NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `email` VARCHAR(255) NOT NULL,
+    `password` VARCHAR(255) NOT NULL,
+    `phone` VARCHAR(255) DEFAULT NULL,
+    `designation` VARCHAR(255) DEFAULT NULL,
+    `created_at` TIMESTAMP NULL DEFAULT NULL,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `hod_users_email_unique` (`email`),
+    KEY `hod_users_department_id_index` (`department_id`),
+    CONSTRAINT `hod_users_department_id_foreign` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
 -- Table: submissions
 -- --------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `submissions` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `reference_number` VARCHAR(255) NOT NULL,
     `department_id` BIGINT UNSIGNED NOT NULL,
+    `hod_user_id` BIGINT UNSIGNED DEFAULT NULL,
+    `staff_name` VARCHAR(255) NOT NULL,
     `submitted_by` VARCHAR(255) NOT NULL,
     `designation` VARCHAR(255) DEFAULT NULL,
     `email` VARCHAR(255) NOT NULL,
@@ -54,6 +75,7 @@ CREATE TABLE IF NOT EXISTS `submissions` (
     `community_services` JSON NOT NULL,
     `future_plans` JSON NOT NULL,
     `supporting_documents` VARCHAR(255) DEFAULT NULL,
+    `google_drive_link` VARCHAR(500) DEFAULT NULL,
     `submission_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `status` ENUM('pending', 'completed') NOT NULL DEFAULT 'pending',
     `created_at` TIMESTAMP NULL DEFAULT NULL,
@@ -61,7 +83,9 @@ CREATE TABLE IF NOT EXISTS `submissions` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `submissions_reference_number_unique` (`reference_number`),
     KEY `submissions_department_id_foreign` (`department_id`),
-    CONSTRAINT `submissions_department_id_foreign` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE CASCADE
+    KEY `submissions_hod_user_id_foreign` (`hod_user_id`),
+    CONSTRAINT `submissions_department_id_foreign` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `submissions_hod_user_id_foreign` FOREIGN KEY (`hod_user_id`) REFERENCES `hod_users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------

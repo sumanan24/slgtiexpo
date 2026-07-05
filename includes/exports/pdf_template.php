@@ -13,12 +13,12 @@ th,td{border:1px solid #ddd;padding:6px}th{background:#005BAC;color:#fff}
 <tr><td><?= e($s['department_name']) ?></td><td><?= $m['total_students'] ?></td><td><?= $m['total_graduates'] ?></td><td><?= $m['employment_rate'] ?>%</td><td><?= number_format($m['total_income'],2) ?></td><td><?= $m['research_output'] ?></td></tr>
 <?php endforeach; ?></tbody></table>
 <?php elseif (!empty($department)): ?>
-<p><strong><?= e($department['department_name']) ?></strong> — Staff Name: <?= e($department['staff_name']) ?></p>
+<p><strong><?= e($department['department_name']) ?></strong></p>
 <?php foreach ($submissions as $s): $m = submission_metrics($s); ?>
-<p><strong><?= e($s['reference_number']) ?></strong> — Students: <?= $m['total_students'] ?>, Graduates: <?= $m['total_graduates'] ?>, Income: LKR <?= number_format($m['total_income'],2) ?></p>
+<p><strong><?= e($s['reference_number']) ?></strong> — Staff: <?= e($s['staff_name'] ?? '') ?> — Students: <?= $m['total_students'] ?>, Graduates: <?= $m['total_graduates'] ?>, Income: LKR <?= number_format($m['total_income'],2) ?></p>
 <?php endforeach; ?>
 <?php else: foreach ($submissions as $s): $m = submission_metrics($s); ?>
 <h3 style="color:#005BAC"><?= e($s['department_name']) ?></h3>
-<p>Ref: <?= e($s['reference_number']) ?> | Students: <?= $m['total_students'] ?> | Graduates: <?= $m['total_graduates'] ?> | Income: LKR <?= number_format($m['total_income'],2) ?></p>
+<p>Ref: <?= e($s['reference_number']) ?> | Staff: <?= e($s['staff_name'] ?? '') ?> | Students: <?= $m['total_students'] ?> | Graduates: <?= $m['total_graduates'] ?> | Income: LKR <?= number_format($m['total_income'],2) ?></p>
 <?php endforeach; endif; ?>
 </body></html>

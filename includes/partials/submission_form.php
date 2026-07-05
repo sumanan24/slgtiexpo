@@ -1,5 +1,7 @@
 <?php
 $s = $submission ?? null;
+$hodLocked = $hodLocked ?? false;
+$lockedDepartment = $lockedDepartment ?? null;
 $sg = $s['student_growth'] ?? [];
 $dg = $s['department_growth'] ?? [];
 $sa = $s['special_achievements'] ?? [];
@@ -16,19 +18,26 @@ $fp = $s['future_plans'] ?? [];
     <div class="row g-3">
         <div class="col-md-6">
             <label class="form-label">Department Name <span class="text-danger">*</span></label>
+            <?php if ($hodLocked && $lockedDepartment): ?>
+                <input type="text" class="form-control" readonly value="<?= e($lockedDepartment['department_name']) ?>">
+                <input type="hidden" name="department_id" value="<?= (int)$lockedDepartment['id'] ?>">
+            <?php else: ?>
             <select name="department_id" id="department_id" class="form-select" required>
                 <option value="">Select Department</option>
                 <?php foreach ($departments as $department): ?>
-                <option value="<?= $department['id'] ?>" data-staff-name="<?= e($department['staff_name']) ?>"
+                <option value="<?= $department['id'] ?>"
                     <?= (int)($s['department_id'] ?? $_POST['department_id'] ?? 0) === (int)$department['id'] ? 'selected' : '' ?>>
                     <?= e($department['department_name']) ?>
                 </option>
                 <?php endforeach; ?>
             </select>
+            <?php endif; ?>
         </div>
         <div class="col-md-6">
-            <label class="form-label">Staff Name</label>
-            <input type="text" id="staff_name" class="form-control" readonly value="<?= e($s['staff_name'] ?? '') ?>">
+            <label class="form-label">Staff Name <span class="text-danger">*</span></label>
+            <input type="text" name="staff_name" class="form-control" required
+                placeholder="Enter staff name"
+                value="<?= e($s['staff_name'] ?? $_POST['staff_name'] ?? '') ?>">
         </div>
         <div class="col-md-6">
             <label class="form-label">Submitted By <span class="text-danger">*</span></label>
@@ -99,7 +108,7 @@ $fp = $s['future_plans'] ?? [];
     <h5><i class="bi bi-calendar-event me-2"></i>Events Conducted</h5>
     <div class="row g-3">
         <?php foreach (['workshops'=>'Workshops','seminars'=>'Seminars','competitions'=>'Competitions','exhibitions'=>'Exhibitions','industrial_visits'=>'Industrial Visits'] as $k=>$l): ?>
-        <div class="col-md-4 col-lg">
+        <div class="col-6 col-md-4 col-lg">
             <label class="form-label"><?= $l ?></label>
             <input type="number" name="events_conducted[<?= $k ?>]" class="form-control" min="0" value="<?= e($ev[$k] ?? $_POST['events_conducted'][$k] ?? 0) ?>">
         </div>
@@ -197,12 +206,35 @@ $fp = $s['future_plans'] ?? [];
 </div>
 
 <div class="form-section">
-    <h5><i class="bi bi-paperclip me-2"></i>Document Upload</h5>
-    <input type="file" name="supporting_documents" class="form-control" accept=".pdf,.docx,.jpg,.jpeg,.png">
-    <small class="text-muted">Accepted: PDF, DOCX, JPG, PNG (Max 10MB)</small>
-    <?php if (!empty($s['supporting_documents'])): ?>
-    <p class="mt-2 mb-0"><a href="<?= url($s['supporting_documents']) ?>" target="_blank">View current document</a></p>
-    <?php endif; ?>
+    <h5><i class="bi bi-paperclip me-2"></i>Documents</h5>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Upload Document</label>
+            <input type="file" name="supporting_documents" class="form-control" accept=".pdf,.docx,.jpg,.jpeg,.png">
+            <small class="text-muted d-block mt-1">Accepted: PDF, DOCX, JPG, PNG (Max 10MB)</small>
+            <?php if (!empty($s['supporting_documents'])): ?>
+            <p class="mt-2 mb-0">
+                <a href="<?= url($s['supporting_documents']) ?>" target="_blank" rel="noopener">
+                    <i class="bi bi-file-earmark-arrow-down me-1"></i>View uploaded document
+                </a>
+            </p>
+            <?php endif; ?>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Google Drive Link</label>
+            <input type="text" name="google_drive_link" class="form-control" inputmode="url"
+                placeholder="drive.google.com/file/d/... or docs.google.com/..."
+                value="<?= e($s['google_drive_link'] ?? $_POST['google_drive_link'] ?? '') ?>">
+            <small class="text-muted d-block mt-1">Paste a shareable Google Drive, Docs, Sheets, or Slides link.</small>
+            <?php if (!empty($s['google_drive_link'])): ?>
+            <p class="mt-2 mb-0">
+                <a href="<?= e($s['google_drive_link']) ?>" target="_blank" rel="noopener">
+                    <i class="bi bi-google me-1"></i>Open current Google Drive link
+                </a>
+            </p>
+            <?php endif; ?>
+        </div>
+    </div>
 </div>
 
 <?php if (!empty($showStatus)): ?>
@@ -214,16 +246,3 @@ $fp = $s['future_plans'] ?? [];
     </select>
 </div>
 <?php endif; ?>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const deptSelect = document.getElementById('department_id');
-    const staffInput = document.getElementById('staff_name');
-    function updateStaffName() {
-        const opt = deptSelect.options[deptSelect.selectedIndex];
-        staffInput.value = opt.dataset.staffName || '';
-    }
-    deptSelect.addEventListener('change', updateStaffName);
-    updateStaffName();
-});
-</script>

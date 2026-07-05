@@ -194,6 +194,94 @@ function handle_upload(?array $file, ?string $existing = null): ?string
     return 'uploads/' . basename($filename);
 }
 
+function normalize_google_drive_link(string $link): string
+{
+    $link = trim($link);
+    if ($link === '') {
+        return '';
+    }
+
+    if (!preg_match('#^https?://#i', $link)) {
+        $link = 'https://' . ltrim($link, '/');
+    }
+
+    return $link;
+}
+
+function is_valid_google_drive_link(string $link): bool
+{
+    $link = normalize_google_drive_link($link);
+    if ($link === '' || !filter_var($link, FILTER_VALIDATE_URL)) {
+        return false;
+    }
+
+    $host = strtolower((string)parse_url($link, PHP_URL_HOST));
+    $path = strtolower((string)(parse_url($link, PHP_URL_PATH) ?? ''));
+
+    if (in_array($host, [
+        'drive.google.com',
+        'www.drive.google.com',
+        'docs.google.com',
+        'www.docs.google.com',
+        'links.google.com',
+    ], true)) {
+        return true;
+    }
+
+    if (preg_match('/^(drive|docs)\.google\.[a-z.]+$/', $host)) {
+        return true;
+    }
+
+    if (in_array($host, ['google.com', 'www.google.com'], true)) {
+        return str_starts_with($path, '/drive')
+            || str_starts_with($path, '/document')
+            || str_starts_with($path, '/spreadsheets')
+            || str_starts_with($path, '/presentation');
+    }
+
+    return false;
+}
+
+function store_submission_form_input(array $data, int $submissionId = 0): void
+{
+    if ($submissionId > 0) {
+        $data['_submission_id'] = $submissionId;
+    }
+    $_SESSION['submission_form_input'] = $data;
+}
+
+function pull_submission_form_input(): ?array
+{
+    $data = $_SESSION['submission_form_input'] ?? null;
+    unset($_SESSION['submission_form_input']);
+    return is_array($data) ? $data : null;
+}
+
+function merge_submission_with_form_input(?array $submission, ?array $input): array
+{
+    if (!$input) {
+        return $submission ?? [];
+    }
+
+    $result = $submission ?? [];
+    $submissionId = (int)($input['_submission_id'] ?? 0);
+    unset($input['_submission_id']);
+
+    foreach ($input as $key => $value) {
+        if (is_array($value) && isset($result[$key]) && is_array($result[$key])) {
+            $result[$key] = array_merge($result[$key], $value);
+        } else {
+            $result[$key] = $value;
+        }
+    }
+
+    if ($submissionId > 0) {
+        $result['id'] = $submissionId;
+    }
+
+    return $result;
+}
+
 function load_composer(): void
 {
     static $loaded = false;
@@ -207,9 +295,11 @@ function load_composer(): void
     require_once $autoload;
     $loaded = true;
 }
+function collect_submission_data(): array
 {
     return [
         'department_id' => (int)($_POST['department_id'] ?? 0),
+        'staff_name' => trim($_POST['staff_name'] ?? ''),
         'submitted_by' => trim($_POST['submitted_by'] ?? ''),
         'designation' => trim($_POST['designation'] ?? ''),
         'email' => trim($_POST['email'] ?? ''),
@@ -225,6 +315,7 @@ function load_composer(): void
         'infrastructure_development' => trim($_POST['infrastructure_development'] ?? ''),
         'community_services' => $_POST['community_services'] ?? [],
         'future_plans' => $_POST['future_plans'] ?? [],
+        'google_drive_link' => normalize_google_drive_link($_POST['google_drive_link'] ?? ''),
         'status' => $_POST['status'] ?? 'pending',
     ];
 }
@@ -234,6 +325,7 @@ function validate_submission(array $data, bool $isAdmin = false): array
     $errors = [];
 
     if ($data['department_id'] <= 0) $errors[] = 'Please select a department.';
+    if ($data['staff_name'] === '') $errors[] = 'Staff name is required.';
     if ($data['submitted_by'] === '') $errors[] = 'Submitted by is required.';
     if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) $errors[] = 'Valid email is required.';
     if ($data['phone'] === '') $errors[] = 'Phone number is required.';
@@ -243,6 +335,11 @@ function validate_submission(array $data, bool $isAdmin = false): array
     if ($rate < 0 || $rate > 100) $errors[] = 'Employment rate must be between 0 and 100.';
     if ($isAdmin && !in_array($data['status'], ['pending', 'completed'], true)) {
         $errors[] = 'Invalid status.';
+    }
+
+    $driveLink = $data['google_drive_link'] ?? '';
+    if ($driveLink !== '' && !is_valid_google_drive_link($driveLink)) {
+        $errors[] = 'Please enter a valid Google Drive or Google Docs share link.';
     }
 
     return $errors;

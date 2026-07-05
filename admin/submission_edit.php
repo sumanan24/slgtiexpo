@@ -4,6 +4,8 @@ require_admin();
 $id = (int)($_GET['id'] ?? 0);
 $submission = Submission::find($id);
 if (!$submission) { flash('error', 'Submission not found.'); redirect('admin/submissions.php'); }
+$formInput = pull_submission_form_input();
+$submission = merge_submission_with_form_input($submission, $formInput);
 $departments = Department::all();
 $showStatus = true;
 $pageTitle = 'Edit Submission';
