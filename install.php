@@ -1,12 +1,12 @@
 <?php
 /**
  * SLGTI Database Installer
- * Run once: http://localhost/slgtiexpo/install.php
- * Delete this file after successful installation.
+ * Run once, then delete this file after successful installation.
  */
 require_once __DIR__ . '/includes/init.php';
 
 $messages = [];
+$hints = [];
 $success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -16,6 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $messages[] = 'Database installed successfully using config/config.php connection settings.';
     } catch (Throwable $e) {
         $messages[] = 'Error: ' . $e->getMessage();
+        $hint = db_connection_hint($e);
+        if ($hint !== '') {
+            $hints[] = $hint;
+        }
     }
 } else {
     try {
@@ -27,7 +31,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $success = $depts > 0 && $admins > 0;
     } catch (Throwable $e) {
         $messages[] = 'Connection failed: ' . $e->getMessage();
-        $messages[] = 'Check config/config.php, then click Install to create the database and tables.';
+        $hint = db_connection_hint($e);
+        if ($hint !== '') {
+            $hints[] = $hint;
+        }
+        $hints[] = 'On cPanel hosting, create the database and user first, then set db_allow_create to false in config/config.php.';
     }
 }
 ?>
@@ -41,19 +49,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="bg-light">
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-7">
             <div class="card shadow">
                 <div class="card-body p-4">
                     <h3 class="text-primary mb-4">SLGTI Database Installer</h3>
                     <?php foreach ($messages as $msg): ?>
-                        <div class="alert alert-<?= $success ? 'success' : 'warning' ?>"><?= htmlspecialchars($msg) ?></div>
+                        <div class="alert alert-<?= $success ? 'success' : 'danger' ?>"><?= htmlspecialchars($msg) ?></div>
+                    <?php endforeach; ?>
+                    <?php foreach ($hints as $hint): ?>
+                        <div class="alert alert-warning mb-2"><?= htmlspecialchars($hint) ?></div>
                     <?php endforeach; ?>
                     <div class="bg-light border rounded p-3 mb-3 small">
                         <strong>Database config</strong><br>
                         Host: <?= htmlspecialchars($config['db_host']) ?><br>
-                        Port: <?= htmlspecialchars($config['db_port']) ?><br>
+                        Port: <?= htmlspecialchars((string)$config['db_port']) ?><br>
                         Database: <?= htmlspecialchars($config['db_name']) ?><br>
-                        User: <?= htmlspecialchars($config['db_user']) ?>
+                        User: <?= htmlspecialchars($config['db_user']) ?><br>
+                        Create database: <?= ($config['db_allow_create'] ?? true) ? 'Yes' : 'No (use existing cPanel database)' ?>
                     </div>
                     <?php if ($success): ?>
                         <p><strong>Admin Login:</strong> admin@slgti.lk / admin123</p>
